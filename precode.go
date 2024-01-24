@@ -50,9 +50,13 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "app;ication/json")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp) // подсказали сделать так, но не очень понимаю зачем w.write сюда выносить
+	if err != nil {
+		http.Error() //а тут не понимаю что в скобках нужно
+		return
+	}
 }
 
 // 2. Обработчик для отправки задачи на сервер
@@ -62,11 +66,11 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 
 	_, err := buf.ReadFrom(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	tasks[task.ID] = task
@@ -80,7 +84,7 @@ func getTaskForId(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	task, ok := tasks[id]
 	if !ok {
-		http.Error(w, "Задача не найдена", http.StatusNoContent)
+		http.Error(w, "Задача не найдена", http.StatusBadRequest)
 		return
 	}
 
@@ -95,7 +99,7 @@ func taskDel(w http.ResponseWriter, r *http.Request) {
 
 	_, ok := tasks[id]
 	if !ok {
-		http.Error(w, "Не удалось удалить задачу. Отсутствует запрашиваемая задача.", http.StatusNoContent)
+		http.Error(w, "Не удалось удалить задачу. Отсутствует запрашиваемая задача.", http.StatusInternalServerError)
 		return
 	}
 
