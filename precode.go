@@ -52,9 +52,9 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(resp) // подсказали сделать так, но не очень понимаю зачем w.write сюда выносить
+	_, err = w.Write(resp)
 	if err != nil {
-		http.Error() //а тут не понимаю что в скобках нужно
+		fmt.Println("failed to write responce", err.Error()) //не понимаю зачем ", err.Error()" из комментария
 		return
 	}
 }
@@ -70,7 +70,7 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	tasks[task.ID] = task
@@ -89,8 +89,13 @@ func getTaskForId(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(task)
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write(resp) // не понимаю почему ругается на resp
+	if err != nil {
+		fmt.Println("failed to write responce", err.Error())
+		return
+		json.NewEncoder(w).Encode(task) // в данной обработке вообще запутался
+	}
 }
 
 // 4. Обработчик для удаления задачи по ID
@@ -99,7 +104,7 @@ func taskDel(w http.ResponseWriter, r *http.Request) {
 
 	_, ok := tasks[id]
 	if !ok {
-		http.Error(w, "Не удалось удалить задачу. Отсутствует запрашиваемая задача.", http.StatusInternalServerError)
+		http.Error(w, "Не удалось удалить задачу. Отсутствует запрашиваемая задача.", http.StatusBadRequest)
 		return
 	}
 
