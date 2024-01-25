@@ -54,7 +54,7 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(resp)
 	if err != nil {
-		fmt.Println("failed to write responce", err.Error()) //не понимаю зачем ", err.Error()" из комментария
+		fmt.Println("failed to write responce", err.Error())
 		return
 	}
 }
@@ -87,15 +87,19 @@ func getTaskForId(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Задача не найдена", http.StatusBadRequest)
 		return
 	}
-
+	resp, err := json.Marshal(task)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_, err := w.Write(resp) // не понимаю почему ругается на resp
+
+	_, err = w.Write(resp) // не понимаю почему ругается на resp
 	if err != nil {
-		fmt.Println("failed to write responce", err.Error())
-		return
-		json.NewEncoder(w).Encode(task) // в данной обработке вообще запутался
+		fmt.Printf("Ошибка записи: %v", err)
 	}
+	json.NewEncoder(w).Encode(task) // в данной обработке вообще запутался
 }
 
 // 4. Обработчик для удаления задачи по ID
