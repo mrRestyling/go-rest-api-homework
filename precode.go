@@ -95,11 +95,11 @@ func getTaskForId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	_, err = w.Write(resp) // не понимаю почему ругается на resp
+	_, err = w.Write(resp) 
 	if err != nil {
 		fmt.Printf("Ошибка записи: %v", err)
 	}
-	json.NewEncoder(w).Encode(task) // в данной обработке вообще запутался
+	json.NewEncoder(w).Encode(task) 
 }
 
 // 4. Обработчик для удаления задачи по ID
